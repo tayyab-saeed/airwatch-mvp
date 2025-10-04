@@ -4,7 +4,7 @@ import "./globals.css";
 // Ant Design styles
 import "antd/dist/reset.css";
 import { ConfigProvider } from "antd";
-
+import { AntdRegistry } from '@ant-design/nextjs-registry';
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -30,6 +30,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+      <AntdRegistry>
         <ConfigProvider
           theme={{
             token: {
@@ -40,6 +41,7 @@ export default function RootLayout({
         >
           {children}
         </ConfigProvider>
+        </AntdRegistry>
       </body>
     </html>
   );
