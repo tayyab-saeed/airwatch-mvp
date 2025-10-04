@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Row, Col, Select, Button, Tooltip, Badge, Switch } from "antd";
+import { Card, Row, Col, Select, Button, Tooltip, Switch } from "antd";
 import { 
   Layers, 
   MapPin, 
@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardLayout from "../../components/DashboardLayout";
-import { generateMockData, getAQICategory, getAQIColor } from "../../utils/airQuality";
+import { generateMockData } from "../../utils/airQuality";
 
 import MapWrapper from "../../components/MapWrapper";
 
@@ -23,7 +23,7 @@ export default function MapPage() {
   const [selectedPollutant, setSelectedPollutant] = useState("aqi");
   const [timeRange, setTimeRange] = useState("realtime");
   const [mapData, setMapData] = useState(generateMockData());
-  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [, setSelectedLocation] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const refreshData = async () => {
@@ -164,29 +164,12 @@ export default function MapPage() {
                 </div>
               </Col>
             </Row>
-          </Card>
-        </motion.div>
 
-        {/* Map Container */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          style={{ flex: 1 }}
-        >
-          <Card className="h-full">
-            <div className="w-full h-full relative">
-              <MapWrapper
-                data={mapData}
-                selectedLayer={selectedLayer}
-                selectedPollutant={selectedPollutant}
-                showSensors={showSensors}
-                showHeatmap={showHeatmap}
-                onLocationSelect={setSelectedLocation}
-              />
-              
-              {/* Map Legend */}
-              <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-4 max-w-xs">
+            <Row className="mt-4">
+              <Col span={24}>
+                
+                            {/* Map Legend */}
+              <div className=" bg-white rounded-lg shadow-lg p-4 max-w-xs">
                 <h4 className="font-medium mb-2">AQI Color Scale</h4>
                 <div className="space-y-1">
                   {[
@@ -208,61 +191,28 @@ export default function MapPage() {
                   ))}
                 </div>
               </div>
+              </Col>
+            </Row>
+          </Card>
+        </motion.div>
 
-              {/* Location Info Panel */}
-              {selectedLocation && (
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  style={{
-                    position: 'absolute',
-                    top: '16px',
-                    right: '16px',
-                    backgroundColor: 'white',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    padding: '16px',
-                    maxWidth: '320px'
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">{selectedLocation.name}</h4>
-                    <Button 
-                      type="text" 
-                      size="small"
-                      onClick={() => setSelectedLocation(null)}
-                    >
-                      ×
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">AQI:</span>
-                      <Badge 
-                        count={selectedLocation.aqi}
-                        style={{ backgroundColor: getAQIColor(selectedLocation.aqi) }}
-                      />
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">PM2.5:</span>
-                      <span className="text-sm font-medium">{selectedLocation.pm25} µg/m³</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">PM10:</span>
-                      <span className="text-sm font-medium">{selectedLocation.pm10} µg/m³</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">O3:</span>
-                      <span className="text-sm font-medium">{selectedLocation.o3} ppb</span>
-                    </div>
-                    <div className="mt-2 pt-2 border-t">
-                      <p className="text-xs text-gray-500">
-                        {getAQICategory(selectedLocation.aqi).description}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
+        {/* Map Container */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          style={{ flex: 1 }}
+        >
+          <Card className="h-full" classNames={{body: 'p-0'}}>
+            <div className="w-full h-full">
+              <MapWrapper
+                data={mapData}
+                selectedLayer={selectedLayer}
+                selectedPollutant={selectedPollutant}
+                showSensors={showSensors}
+                showHeatmap={showHeatmap}
+                onLocationSelect={setSelectedLocation}
+              />
             </div>
           </Card>
         </motion.div>
