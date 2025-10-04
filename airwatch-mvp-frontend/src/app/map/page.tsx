@@ -58,7 +58,7 @@ export default function MapPage() {
 
   return (
     <DashboardLayout>
-      <div className="w-full h-[calc(100vh-120px)] flex flex-col">
+      <div className="w-full h-[calc(100vh-80px)] flex flex-col">
         {/* Map Controls */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -174,7 +174,7 @@ export default function MapPage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           style={{ flex: 1 }}
         >
-          <Card className="h-full">
+          <Card className="h-full" styles={{ body: { padding: '12px', height: '100%' } }}>
             <div className="w-full h-full relative">
               <MapWrapper
                 data={mapData}
@@ -186,9 +186,9 @@ export default function MapPage() {
               />
               
               {/* Map Legend */}
-              <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-4 max-w-xs">
-                <h4 className="font-medium mb-2">AQI Color Scale</h4>
-                <div className="space-y-1">
+              <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 max-w-[240px] z-10">
+                <h4 className="font-semibold text-sm mb-2 text-gray-800">AQI Color Scale</h4>
+                <div className="space-y-1.5">
                   {[
                     { range: "0-50", label: "Good", color: "#00e400" },
                     { range: "51-100", label: "Moderate", color: "#ffff00" },
@@ -197,12 +197,12 @@ export default function MapPage() {
                     { range: "201-300", label: "Very Unhealthy", color: "#8f3f97" },
                     { range: "301+", label: "Hazardous", color: "#7e0023" }
                   ].map((item) => (
-                    <div key={item.range} className="flex items-center gap-2 text-sm">
+                    <div key={item.range} className="flex items-center gap-2">
                       <div 
-                        className="w-4 h-4 rounded"
+                        className="w-5 h-5 rounded flex-shrink-0 border border-gray-200"
                         style={{ backgroundColor: item.color }}
                       />
-                      <span className="text-xs">{item.range}</span>
+                      <span className="text-xs font-medium text-gray-700 min-w-[45px]">{item.range}</span>
                       <span className="text-xs text-gray-600">{item.label}</span>
                     </div>
                   ))}
