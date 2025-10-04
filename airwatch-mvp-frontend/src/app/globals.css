@@ -5,12 +5,7 @@
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* font variables are set via next/font in layout.tsx */
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -24,3 +19,45 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Ant Design + custom theme tweaks for an eco-friendly look */
+:root {
+  --eco-green-50: #ecfdf5;
+  --eco-green-100: #bbf7d0;
+  --eco-green-200: #86efac;
+  --eco-green-600: #16a34a;
+}
+
+/* Make AntD menu selection use green instead of default blue */
+.ant-menu-inline .ant-menu-item-selected,
+.ant-menu-inline .ant-menu-item-active {
+  background-color: var(--eco-green-50) !important;
+  color: var(--eco-green-600) !important;
+}
+.ant-menu-item .anticon {
+  color: var(--eco-green-600);
+}
+
+/* Remove heavy card inner padding so map/chart can be larger */
+.ant-card-body {
+  padding: 18px !important;
+}
+
+/* Make cards appear lighter and more open */
+.ant-card {
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+}
+
+/* Sidebar tweaks: remove blue indicator and use subtle green */
+.ant-menu-inline .ant-menu-item-selected::after {
+  background: transparent;
+}
+
+/* Reduce page whitespace on large screens */
+.page-container {
+  padding-left: 16px;
+  padding-right: 16px;
+  max-width: 100%;
+}
+
