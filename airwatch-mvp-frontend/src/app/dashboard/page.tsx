@@ -10,11 +10,18 @@ import { generateMockData, generateHistoricalData, getAQICategory, getAQIColor, 
 import { useState, useEffect } from "react";
 
 export default function DashboardPage() {
-  const [currentData, setCurrentData] = useState(generateMockData()[0]);
-  const [historicalData, ] = useState(generateHistoricalData(7));
-  const [lastUpdated, setLastUpdated] = useState(new Date().toISOString());
+  const [currentData, setCurrentData] = useState<any>(null);
+  const [historicalData, setHistoricalData] = useState<any[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Initialize data on client side only to avoid hydration mismatch
+    setCurrentData(generateMockData()[0]);
+    setHistoricalData(generateHistoricalData(7));
+    setLastUpdated(new Date().toISOString());
+    setIsLoading(false);
+
     // Simulate real-time updates
     const interval = setInterval(() => {
       const newData = generateMockData()[0];
@@ -24,6 +31,19 @@ export default function DashboardPage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Show loading state while data initializes
+  if (isLoading || !currentData || historicalData.length === 0) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="text-lg text-gray-600">Loading air quality data...</div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   const aqiCategory = getAQICategory(currentData.aqi);
   const aqiColor = getAQIColor(currentData.aqi);
