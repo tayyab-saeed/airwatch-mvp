@@ -1,18 +1,271 @@
 "use client";
 
+import { useState } from "react";
+import { Card, Row, Col, Select, Button, Tooltip, Badge, Switch } from "antd";
+import { 
+  Layers, 
+  MapPin, 
+  Thermometer, 
+  RefreshCw,
+  Download,
+  Share2
+} from "lucide-react";
+import { motion } from "framer-motion";
 import DashboardLayout from "../../components/DashboardLayout";
-import { Card } from "antd";
+import { generateMockData, getAQICategory, getAQIColor } from "../../utils/airQuality";
+
+import MapWrapper from "../../components/MapWrapper";
 
 export default function MapPage() {
+  const [selectedLayer, setSelectedLayer] = useState("heatmap");
+  const [showSensors, setShowSensors] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(true);
+  const [selectedPollutant, setSelectedPollutant] = useState("aqi");
+  const [timeRange, setTimeRange] = useState("realtime");
+  const [mapData, setMapData] = useState(generateMockData());
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const refreshData = async () => {
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      setMapData(generateMockData());
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  const layerOptions = [
+    { value: "heatmap", label: "Heat Map", icon: <Thermometer className="w-4 h-4" /> },
+    { value: "sensors", label: "Sensor Points", icon: <MapPin className="w-4 h-4" /> },
+    { value: "contours", label: "Contour Lines", icon: <Layers className="w-4 h-4" /> }
+  ];
+
+  const pollutantOptions = [
+    { value: "aqi", label: "AQI", color: "#16a34a" },
+    { value: "pm25", label: "PM2.5", color: "#3b82f6" },
+    { value: "pm10", label: "PM10", color: "#8b5cf6" },
+    { value: "o3", label: "Ozone", color: "#f59e0b" },
+    { value: "no2", label: "NO2", color: "#ef4444" }
+  ];
+
+  const timeRangeOptions = [
+    { value: "realtime", label: "Real-time" },
+    { value: "1hour", label: "1 Hour" },
+    { value: "24hours", label: "24 Hours" },
+    { value: "7days", label: "7 Days" }
+  ];
+
   return (
     <DashboardLayout>
-      <div className="w-full">
-        <Card className="h-[calc(100vh-180px)]">
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            Map will be integrated here. The card takes most of the viewport height
-            to give maximum space for the map visualization.
-          </div>
-        </Card>
+      <div className="w-full h-[calc(100vh-120px)] flex flex-col">
+        {/* Map Controls */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="mb-4">
+            <Row gutter={[16, 16]} align="middle">
+              <Col xs={24} sm={12} md={6}>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Visualization Layer</label>
+                  <Select
+                    value={selectedLayer}
+                    onChange={setSelectedLayer}
+                    className="w-full"
+                    options={layerOptions.map(option => ({
+                      value: option.value,
+                      label: (
+                        <div className="flex items-center gap-2">
+                          {option.icon}
+                          {option.label}
+                        </div>
+                      )
+                    }))}
+                  />
+                </div>
+              </Col>
+              
+              <Col xs={24} sm={12} md={6}>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Pollutant</label>
+                  <Select
+                    value={selectedPollutant}
+                    onChange={setSelectedPollutant}
+                    className="w-full"
+                    options={pollutantOptions.map(option => ({
+                      value: option.value,
+                      label: (
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full" 
+                            style={{ backgroundColor: option.color }}
+                          />
+                          {option.label}
+                        </div>
+                      )
+                    }))}
+                  />
+                </div>
+              </Col>
+
+              <Col xs={24} sm={12} md={6}>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Time Range</label>
+                  <Select
+                    value={timeRange}
+                    onChange={setTimeRange}
+                    className="w-full"
+                    options={timeRangeOptions}
+                  />
+                </div>
+              </Col>
+
+              <Col xs={24} sm={12} md={6}>
+                <div className="flex gap-2">
+                  <Tooltip title="Refresh Data">
+                    <Button 
+                      icon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
+                      onClick={refreshData}
+                      loading={isLoading}
+                    />
+                  </Tooltip>
+                  <Tooltip title="Export Map">
+                    <Button icon={<Download className="w-4 h-4" />} />
+                  </Tooltip>
+                  <Tooltip title="Share Map">
+                    <Button icon={<Share2 className="w-4 h-4" />} />
+                  </Tooltip>
+                </div>
+              </Col>
+            </Row>
+
+            {/* Toggle Controls */}
+            <Row gutter={[16, 16]} className="mt-4">
+              <Col>
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={showSensors} 
+                    onChange={setShowSensors}
+                    size="small"
+                  />
+                  <span className="text-sm">Show Sensor Points</span>
+                </div>
+              </Col>
+              <Col>
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={showHeatmap} 
+                    onChange={setShowHeatmap}
+                    size="small"
+                  />
+                  <span className="text-sm">Show Heat Map</span>
+                </div>
+              </Col>
+            </Row>
+          </Card>
+        </motion.div>
+
+        {/* Map Container */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          style={{ flex: 1 }}
+        >
+          <Card className="h-full">
+            <div className="w-full h-full relative">
+              <MapWrapper
+                data={mapData}
+                selectedLayer={selectedLayer}
+                selectedPollutant={selectedPollutant}
+                showSensors={showSensors}
+                showHeatmap={showHeatmap}
+                onLocationSelect={setSelectedLocation}
+              />
+              
+              {/* Map Legend */}
+              <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-lg p-4 max-w-xs">
+                <h4 className="font-medium mb-2">AQI Color Scale</h4>
+                <div className="space-y-1">
+                  {[
+                    { range: "0-50", label: "Good", color: "#00e400" },
+                    { range: "51-100", label: "Moderate", color: "#ffff00" },
+                    { range: "101-150", label: "Unhealthy for Sensitive", color: "#ff7e00" },
+                    { range: "151-200", label: "Unhealthy", color: "#ff0000" },
+                    { range: "201-300", label: "Very Unhealthy", color: "#8f3f97" },
+                    { range: "301+", label: "Hazardous", color: "#7e0023" }
+                  ].map((item) => (
+                    <div key={item.range} className="flex items-center gap-2 text-sm">
+                      <div 
+                        className="w-4 h-4 rounded"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-xs">{item.range}</span>
+                      <span className="text-xs text-gray-600">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Location Info Panel */}
+              {selectedLocation && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  style={{
+                    position: 'absolute',
+                    top: '16px',
+                    right: '16px',
+                    backgroundColor: 'white',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    padding: '16px',
+                    maxWidth: '320px'
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">{selectedLocation.name}</h4>
+                    <Button 
+                      type="text" 
+                      size="small"
+                      onClick={() => setSelectedLocation(null)}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">AQI:</span>
+                      <Badge 
+                        count={selectedLocation.aqi}
+                        style={{ backgroundColor: getAQIColor(selectedLocation.aqi) }}
+                      />
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">PM2.5:</span>
+                      <span className="text-sm font-medium">{selectedLocation.pm25} µg/m³</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">PM10:</span>
+                      <span className="text-sm font-medium">{selectedLocation.pm10} µg/m³</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">O3:</span>
+                      <span className="text-sm font-medium">{selectedLocation.o3} ppb</span>
+                    </div>
+                    <div className="mt-2 pt-2 border-t">
+                      <p className="text-xs text-gray-500">
+                        {getAQICategory(selectedLocation.aqi).description}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </Card>
+        </motion.div>
       </div>
     </DashboardLayout>
   );

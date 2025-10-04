@@ -7,11 +7,11 @@ const LottieIcon = dynamic(() => import("./LottieIcon"), { ssr: false });
 
 export default function HeaderBar() {
   return (
-    <header className="w-full border-b border-gray-100 bg-white">
+    <header className="w-full border-b border-gray-100 bg-white header-enhanced">
       <div className="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">
         <div className="flex items-center gap-3">
           {/* try to render Lottie if the animation file is present in public/animations */}
-          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center overflow-hidden">
+          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center overflow-hidden icon-enhanced">
             {/* If you place the Lottie json at public/animations/Greenify the Earth.json
                 the LottieIcon component will render it. Otherwise this inline svg is shown. */}
             <LottieIcon src="animations/Greenify the Earth.json" size={40} />
