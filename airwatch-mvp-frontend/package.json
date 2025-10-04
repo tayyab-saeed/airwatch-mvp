@@ -9,22 +9,31 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ant-design/nextjs-registry": "^1.1.0",
+    "antd": "^5.10.0",
+    "next": "15.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.4",
-    "antd": "^5.10.0"
+    "recharts": "^2.8.0",
+    "mapbox-gl": "^3.0.1",
+    "react-map-gl": "^7.1.7",
+    "lucide-react": "^0.263.1",
+    "framer-motion": "^10.16.4",
+    "date-fns": "^2.30.0",
+    "dayjs": "^1.11.10"
   },
   "dependenciesMeta": {},
   "resolutions": {},
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "@types/mapbox-gl": "^2.7.18",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
