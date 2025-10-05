@@ -7,7 +7,7 @@ import { getAQICategory } from "../utils/airQuality";
 import { AirQualityData } from "../utils/airQuality";
 
 // You'll need to add your Mapbox token to environment variables
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "pk.eyJ1IjoibW5hd2FsYWxpNCIsImEiOiJjbWdjODJmMmEweGhtMmxxdGYyZ2M3Y3gyIn0.B6ID21W_8h-VfmNLmpSjnA";
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 interface AirQualityMapProps {
   data: AirQualityData[];
@@ -33,10 +33,6 @@ function AirQualityMap({
   // Initialize map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
-
-    console.log('Mapbox token:', MAPBOX_TOKEN);
-    console.log('Token length:', MAPBOX_TOKEN.length);
-    console.log('Token starts with pk:', MAPBOX_TOKEN.startsWith('pk.'));
     
     mapboxgl.accessToken = MAPBOX_TOKEN;
     
