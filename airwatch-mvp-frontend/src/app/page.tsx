@@ -27,14 +27,20 @@ export default function HomePage() {
           {[...Array(20)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-2 h-2 bg-white/20 rounded-full"
+              style={{
+                position: 'absolute',
+                width: '0.5rem',
+                height: '0.5rem',
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%',
+              }}
               initial={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
+                x: Math.random() * 1920,
+                y: Math.random() * 1080,
               }}
               animate={{
-                y: [null, Math.random() * window.innerHeight],
-                x: [null, Math.random() * window.innerWidth],
+                y: [null, Math.random() * 1080],
+                x: [null, Math.random() * 1920],
               }}
               transition={{
                 duration: Math.random() * 10 + 20,
@@ -58,13 +64,13 @@ export default function HomePage() {
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-left"
+            style={{ textAlign: 'left' }}
           >
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-block mb-4"
+              style={{ display: 'inline-block', marginBottom: '1rem' }}
             >
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
                 <Leaf className="w-4 h-4 text-green-300" />
@@ -76,7 +82,13 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight"
+              style={{ 
+                fontSize: 'clamp(3rem, 5vw, 4.5rem)',
+                fontWeight: 800,
+                color: 'white',
+                marginBottom: '1.5rem',
+                lineHeight: 1.2
+              }}
             >
               Explore Clean Air
               <span className="block mt-2 bg-gradient-to-r from-green-300 to-emerald-300 bg-clip-text text-transparent">
@@ -88,7 +100,13 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-lg md:text-xl text-green-50 mb-8 leading-relaxed max-w-xl"
+              style={{
+                fontSize: 'clamp(1.125rem, 2vw, 1.25rem)',
+                color: 'rgb(236 253 245)',
+                marginBottom: '2rem',
+                lineHeight: 1.8,
+                maxWidth: '36rem'
+              }}
             >
               Monitor real-time air quality across your region. Get instant insights on pollutants, 
               health recommendations, and predictive forecasts. Make informed decisions for a 
@@ -99,7 +117,11 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="flex flex-wrap gap-4"
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '1rem'
+              }}
             >
               <button
                 onClick={() => router.push("/dashboard")}
@@ -127,7 +149,12 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="grid grid-cols-3 gap-6 mt-12"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '1.5rem',
+                marginTop: '3rem'
+              }}
             >
               <div className="text-left">
                 <div className="text-3xl font-bold text-white">50+</div>
@@ -149,7 +176,7 @@ export default function HomePage() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative"
+            style={{ position: 'relative' }}
           >
             {/* Animated Earth/Air Quality Visual */}
             <div className="relative w-full h-[500px] flex items-center justify-center">
@@ -158,14 +185,26 @@ export default function HomePage() {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                className="absolute w-96 h-96 border-2 border-green-300/30 rounded-full"
+                style={{
+                  position: 'absolute',
+                  width: '24rem',
+                  height: '24rem',
+                  border: '2px solid rgba(134, 239, 172, 0.3)',
+                  borderRadius: '50%'
+                }}
               />
               
               {/* Middle rotating ring */}
               <motion.div
                 animate={{ rotate: -360 }}
                 transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-                className="absolute w-80 h-80 border-2 border-emerald-300/20 rounded-full"
+                style={{
+                  position: 'absolute',
+                  width: '20rem',
+                  height: '20rem',
+                  border: '2px solid rgba(110, 231, 183, 0.2)',
+                  borderRadius: '50%'
+                }}
               />
 
               {/* Center Earth/Globe */}
@@ -174,7 +213,15 @@ export default function HomePage() {
                   y: [0, -20, 0],
                 }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="relative w-64 h-64 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full shadow-2xl overflow-hidden"
+                style={{
+                  position: 'relative',
+                  width: '16rem',
+                  height: '16rem',
+                  background: 'linear-gradient(to bottom right, #4ade80, #10b981)',
+                  borderRadius: '50%',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                  overflow: 'hidden'
+                }}
               >
                 {/* Earth texture overlay */}
                 <div className="absolute inset-0 opacity-30">
@@ -190,7 +237,17 @@ export default function HomePage() {
                 ].map(({ Icon, delay, angle }, i) => (
                   <motion.div
                     key={i}
-                    className="absolute w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center"
+                    style={{
+                      position: 'absolute',
+                      width: '3rem',
+                      height: '3rem',
+                      backgroundColor: 'white',
+                      borderRadius: '50%',
+                      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
                     initial={{
                       x: 0,
                       y: 0,
@@ -219,7 +276,14 @@ export default function HomePage() {
                   opacity: [0.3, 0.1, 0.3],
                 }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute w-80 h-80 bg-green-400 rounded-full blur-3xl"
+                style={{
+                  position: 'absolute',
+                  width: '20rem',
+                  height: '20rem',
+                  backgroundColor: '#4ade80',
+                  borderRadius: '50%',
+                  filter: 'blur(48px)'
+                }}
               />
             </div>
           </motion.div>
@@ -230,7 +294,12 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '1.5rem',
+            marginTop: '5rem'
+          }}
         >
           {[
             {
@@ -254,7 +323,17 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.9 + i * 0.1 }}
-              className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-105"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(12px)',
+                borderRadius: '1rem',
+                padding: '1.5rem',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+              }}
+              whileHover={{ 
+                scale: 1.05,
+                backgroundColor: 'rgba(255, 255, 255, 0.15)'
+              }}
             >
               <div className="text-green-300 mb-4">{feature.icon}</div>
               <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
