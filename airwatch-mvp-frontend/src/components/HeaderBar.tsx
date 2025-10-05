@@ -19,8 +19,8 @@ export default function HeaderBar() {
   };
 
   return (
-    <header className="w-full fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/60 border-b border-white/30 shadow-lg">
-      <div className="max-w-7xl mx-auto flex items-center justify-between py-2.5 px-8">
+    <header className="w-full fixed top-0 left-0 right-0 z-50 backdrop-blur-lg bg-white/60 border-b border-white/30 shadow-lg h-16">
+      <div className="max-w-7xl mx-auto flex items-center justify-between h-full px-8">
         {/* Logo and Branding - Clickable */}
         <button 
           onClick={() => handleNavClick("/")}
