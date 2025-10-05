@@ -58,7 +58,7 @@ export default function MapPage() {
 
   return (
     <DashboardLayout>
-      <div className="w-full h-[calc(100vh-80px)] flex flex-col">
+      <div className="w-full h-[calc(100vh-64px)] flex flex-col">
         {/* Map Controls */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
