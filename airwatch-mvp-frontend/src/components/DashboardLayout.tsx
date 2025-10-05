@@ -2,7 +2,6 @@
 
 import React from "react";
 import HeaderBar from "./HeaderBar";
-import Sidebar from "./Sidebar";
 
 export default function DashboardLayout({
   children,
@@ -10,12 +9,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-white text-[#0b3b16]">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 text-[#0b3b16]">
       <HeaderBar />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 py-6 px-8 page-container">{children}</main>
-      </div>
+      <main className="w-full py-6 px-8 page-container mt-16">{children}</main>
     </div>
   );
 }
