@@ -5,7 +5,6 @@ import { Menu } from "antd";
 import {
   DashboardOutlined,
   EnvironmentOutlined,
-  SettingOutlined,
   LineChartOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
@@ -23,8 +22,6 @@ export default function Sidebar() {
         return "2";
       case "/forecast":
         return "3";
-      case "/settings":
-        return "4";
       default:
         return "1";
     }
@@ -40,9 +37,6 @@ export default function Sidebar() {
         break;
       case "3":
         router.push("/forecast");
-        break;
-      case "4":
-        router.push("/settings");
         break;
     }
   };
@@ -69,7 +63,6 @@ export default function Sidebar() {
               { key: "1", icon: <DashboardOutlined />, label: "Dashboard" },
               { key: "2", icon: <EnvironmentOutlined />, label: "Map" },
               { key: "3", icon: <LineChartOutlined />, label: "Forecast" },
-              { key: "4", icon: <SettingOutlined />, label: "Settings" },
             ]}
           />
         </div>
