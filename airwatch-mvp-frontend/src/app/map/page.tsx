@@ -1,39 +1,53 @@
 "use client";
 
-import { useState } from "react";
-import { Card, Row, Col, Select, Button, Tooltip, Switch } from "antd";
+import { useState, useEffect } from "react";
+import { Card, Row, Col, Select, Button, Tooltip } from "antd";
 import { 
   Layers, 
   MapPin, 
-  Thermometer, 
-  RefreshCw,
+  Thermometer,
   Download,
   Share2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardLayout from "../../components/DashboardLayout";
-import { generateMockData } from "../../utils/airQuality";
-
+import { AirQualityData } from "../../utils/airQuality";
 import MapWrapper from "../../components/MapWrapper";
 
 export default function MapPage() {
-  const [selectedLayer, setSelectedLayer] = useState("heatmap");
+  const [selectedLayer, setSelectedLayer] = useState("sensors");
   const [showSensors, setShowSensors] = useState(true);
-  const [showHeatmap, setShowHeatmap] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
   const [selectedPollutant, setSelectedPollutant] = useState("aqi");
   const [timeRange, setTimeRange] = useState("realtime");
-  const [mapData, setMapData] = useState(generateMockData());
+  const [mapData] = useState<AirQualityData[]>([]); // Empty array - data fetched on click only
   const [, setSelectedLocation] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
 
-  const refreshData = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setMapData(generateMockData());
-      setIsLoading(false);
-    }, 1000);
-  };
+  // Get user's geolocation for centering the map
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      const defaultLocation = { lat: 40.7128, lng: -74.0060 };
+      setUserLocation(defaultLocation);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const location = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setUserLocation(location);
+      },
+      (error) => {
+        console.log("Geolocation error:", error.message);
+        const defaultLocation = { lat: 40.7128, lng: -74.0060 };
+        setUserLocation(defaultLocation);
+      },
+      { timeout: 10000 }
+    );
+  }, []);
 
   const layerOptions = [
     { value: "heatmap", label: "Heat Map", icon: <Thermometer className="w-4 h-4" /> },
@@ -58,7 +72,7 @@ export default function MapPage() {
 
   return (
     <DashboardLayout>
-      <div className="w-full h-[calc(100vh-64px)] flex flex-col">
+      <div className="w-full h-full flex flex-col">
         {/* Map Controls */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -124,73 +138,61 @@ export default function MapPage() {
 
               <Col xs={24} sm={12} md={6}>
                 <div className="flex gap-2">
-                  <Tooltip title="Refresh Data">
-                    <Button 
-                      icon={<RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />}
-                      onClick={refreshData}
-                      loading={isLoading}
-                    />
-                  </Tooltip>
                   <Tooltip title="Export Map">
-                    <Button icon={<Download className="w-4 h-4" />} />
+                    <Button icon={<Download className="w-4 h-4" />} disabled />
                   </Tooltip>
                   <Tooltip title="Share Map">
-                    <Button icon={<Share2 className="w-4 h-4" />} />
+                    <Button icon={<Share2 className="w-4 h-4" />} disabled />
                   </Tooltip>
                 </div>
               </Col>
             </Row>
 
-            {/* Toggle Controls */}
-            <Row gutter={[16, 16]} className="mt-4">
-              <Col>
-                <div className="flex items-center gap-2">
-                  <Switch 
-                    checked={showSensors} 
-                    onChange={setShowSensors}
-                    size="small"
-                  />
-                  <span className="text-sm">Show Sensor Points</span>
-                </div>
-              </Col>
-              <Col>
-                <div className="flex items-center gap-2">
-                  <Switch 
-                    checked={showHeatmap} 
-                    onChange={setShowHeatmap}
-                    size="small"
-                  />
-                  <span className="text-sm">Show Heat Map</span>
-                </div>
-              </Col>
-            </Row>
-
+            {/* Instructions */}
             <Row className="mt-4">
               <Col span={24}>
-                
-                            {/* Map Legend */}
-              <div className=" bg-white rounded-lg shadow-lg p-4 max-w-xs">
-                <h4 className="font-medium mb-2">AQI Color Scale</h4>
-                <div className="space-y-1">
-                  {[
-                    { range: "0-50", label: "Good", color: "#00e400" },
-                    { range: "51-100", label: "Moderate", color: "#ffff00" },
-                    { range: "101-150", label: "Unhealthy for Sensitive", color: "#ff7e00" },
-                    { range: "151-200", label: "Unhealthy", color: "#ff0000" },
-                    { range: "201-300", label: "Very Unhealthy", color: "#8f3f97" },
-                    { range: "301+", label: "Hazardous", color: "#7e0023" }
-                  ].map((item) => (
-                    <div key={item.range} className="flex items-center gap-2">
-                      <div 
-                        className="w-5 h-5 rounded flex-shrink-0 border border-gray-200"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="text-xs font-medium text-gray-700 min-w-[45px]">{item.range}</span>
-                      <span className="text-xs text-gray-600">{item.label}</span>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                      <h4 className="font-semibold text-blue-900 mb-1">How to Use Interactive Map</h4>
+                      <p className="text-sm text-blue-800 mb-2">
+                        Click anywhere on the map to get real-time air quality predictions for that location.
+                      </p>
+                      <ul className="text-sm text-blue-700 space-y-1">
+                        <li>• <strong>Click any spot</strong> → Get instant AQI and pollutant data</li>
+                        <li>• <strong>Color-coded markers</strong> → Green (Good) to Red (Unhealthy)</li>
+                        <li>• <strong>Detailed popup</strong> → PM2.5, PM10, O3, NO2, CO, SO2 levels</li>
+                      </ul>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
+
+                {/* Map Legend */}
+                <div className="bg-white rounded-lg shadow-lg p-4 mt-4 max-w-xs">
+                  <h4 className="font-medium mb-2">AQI Color Scale</h4>
+                  <div className="space-y-1">
+                    {[
+                      { range: "0-50", label: "Good", color: "#059669" },
+                      { range: "51-100", label: "Moderate", color: "#ca8a04" },
+                      { range: "101-150", label: "Unhealthy for Sensitive", color: "#ea580c" },
+                      { range: "151-200", label: "Unhealthy", color: "#dc2626" },
+                      { range: "201-300", label: "Very Unhealthy", color: "#7c3aed" },
+                      { range: "301+", label: "Hazardous", color: "#7f1d1d" }
+                    ].map((item) => (
+                      <div key={item.range} className="flex items-center gap-2">
+                        <div 
+                          className="w-5 h-5 rounded flex-shrink-0 border border-gray-200"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="text-xs font-medium text-gray-700 min-w-[45px]">{item.range}</span>
+                        <span className="text-xs text-gray-600">{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </Col>
             </Row>
           </Card>
@@ -212,6 +214,7 @@ export default function MapPage() {
                 showSensors={showSensors}
                 showHeatmap={showHeatmap}
                 onLocationSelect={setSelectedLocation}
+                userLocation={userLocation || undefined}
               />
             </div>
           </Card>

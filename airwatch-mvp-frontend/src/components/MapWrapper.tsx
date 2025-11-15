@@ -26,6 +26,7 @@ interface MapWrapperProps {
   showSensors: boolean;
   showHeatmap: boolean;
   onLocationSelect: (location: AirQualityData | null) => void;
+  userLocation?: { lat: number; lng: number };
 }
 
 export default function MapWrapper(props: MapWrapperProps) {

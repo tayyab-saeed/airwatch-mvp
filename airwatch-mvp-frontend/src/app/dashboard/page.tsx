@@ -1,33 +1,102 @@
 "use client";
 
-import { Card, Col, Row, Alert, Progress } from "antd";
+import { Card, Col, Row, Alert, Progress, App } from "antd";
 import {  XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
-import { TrendingUp, TrendingDown, Activity, Shield, Wind, Sun, Droplets } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, Shield, Wind, Sun, Droplets, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import DashboardLayout from "../../components/DashboardLayout";
-import { generateMockData, generateHistoricalData, getAQICategory, getAQIColor, getTimeAgo } from "../../utils/airQuality";
+import { generateHistoricalData, getAQICategory, getAQIColor, getTimeAgo, AirQualityData } from "../../utils/airQuality";
+import { getCachedPrediction } from "../../services/api";
 import { useState, useEffect } from "react";
 
 export default function DashboardPage() {
-  const [currentData, setCurrentData] = useState<any>(null);
+  const { message } = App.useApp(); // Use hook-based API
+  const [currentData, setCurrentData] = useState<AirQualityData | null>(null);
   const [historicalData, setHistoricalData] = useState<any[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{lat: number; lng: number; name: string} | null>(null);
+
+  // Function to fetch air quality data
+  const fetchAirQualityData = async (lat: number, lng: number, locationName: string) => {
+    try {
+      setError(null);
+      const result = await getCachedPrediction(lat, lng, locationName);
+      
+      if (result.success && result.data) {
+        setCurrentData(result.data);
+        setLastUpdated(new Date().toISOString());
+        return true;
+      } else {
+        const errorMsg = result.error || "Failed to fetch air quality data";
+        setError(errorMsg);
+        message.error(errorMsg);
+        return false;
+      }
+    } catch (err) {
+      const errorMsg = "Unexpected error occurred";
+      setError(errorMsg);
+      message.error(errorMsg);
+      return false;
+    }
+  };
+
+  // Get user's geolocation
+  const getUserLocation = async () => {
+    return new Promise<{lat: number; lng: number; name: string}>((resolve) => {
+      if (!navigator.geolocation) {
+        console.log("Geolocation not supported, using default location");
+        resolve({ lat: 40.7128, lng: -74.0060, name: "New York, NY" });
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            name: `${position.coords.latitude.toFixed(2)}°, ${position.coords.longitude.toFixed(2)}°`
+          };
+          console.log("Got user location:", location);
+          resolve(location);
+        },
+        (error) => {
+          console.log("Geolocation error, using default location:", error.message);
+          resolve({ lat: 40.7128, lng: -74.0060, name: "New York, NY" });
+        },
+        { timeout: 10000 }
+      );
+    });
+  };
 
   useEffect(() => {
-    // Initialize data on client side only to avoid hydration mismatch
-    setCurrentData(generateMockData()[0]);
-    setHistoricalData(generateHistoricalData(7));
-    setLastUpdated(new Date().toISOString());
-    setIsLoading(false);
+    // Initialize data on client side only
+    const initializeDashboard = async () => {
+      setIsLoading(true);
+      
+      // Get user location
+      const location = await getUserLocation();
+      setUserLocation(location);
+      
+      // Fetch real air quality data
+      await fetchAirQualityData(location.lat, location.lng, location.name);
+      
+      // Generate historical data (mock - backend doesn't provide this)
+      setHistoricalData(generateHistoricalData(7));
+      
+      setIsLoading(false);
+    };
 
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      const newData = generateMockData()[0];
-      setCurrentData(newData);
-      setLastUpdated(new Date().toISOString());
-    }, 30000); // Update every 30 seconds
+    initializeDashboard();
+
+    // Set up real-time updates every 30 seconds
+    const interval = setInterval(async () => {
+      if (userLocation) {
+        await fetchAirQualityData(userLocation.lat, userLocation.lng, userLocation.name);
+      }
+    }, 30000);
 
     return () => clearInterval(interval);
   }, []);
@@ -38,8 +107,41 @@ export default function DashboardPage() {
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="text-lg text-gray-600">Loading air quality data...</div>
+            <div className="text-lg text-gray-600 mb-2">Loading air quality data...</div>
+            <div className="text-sm text-gray-500">
+              {userLocation ? `Fetching data for ${userLocation.name}` : "Getting your location..."}
+            </div>
           </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Show error state if data fetch failed
+  if (error && !currentData) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <Alert
+            message="Unable to Load Data"
+            description={error}
+            type="error"
+            showIcon
+            action={
+              <button
+                onClick={async () => {
+                  if (userLocation) {
+                    setIsLoading(true);
+                    await fetchAirQualityData(userLocation.lat, userLocation.lng, userLocation.name);
+                    setIsLoading(false);
+                  }
+                }}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Retry
+              </button>
+            }
+          />
         </div>
       </DashboardLayout>
     );
@@ -113,7 +215,10 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Air Quality Dashboard</h1>
-              <p className="text-gray-600">Real-time air quality monitoring and analysis</p>
+              <p className="text-gray-600 flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                {currentData.location.name}
+              </p>
             </div>
             <div className="text-right">
               <div className="text-sm text-gray-500">Last updated</div>
@@ -280,7 +385,7 @@ export default function DashboardPage() {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <Card title="Pollutant Breakdown" className="h-[400px]">
-                <div className="space-y-4">
+                <div className="space-y-4 overflow-y-auto max-h-[320px] pr-4">
                   {[
                     { name: "PM2.5", value: currentData.pm25, max: 50, color: "#3b82f6" },
                     { name: "PM10", value: currentData.pm10, max: 100, color: "#8b5cf6" },

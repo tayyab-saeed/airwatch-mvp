@@ -26,7 +26,7 @@ export const getAQICategory = (aqi: number): AQICategory => {
   if (aqi <= 50) {
     return {
       level: "Good",
-      color: "#00e400",
+      color: "#059669",
       description: "Air quality is satisfactory",
       healthMessage: "No health impacts expected",
       recommendations: [
@@ -38,7 +38,7 @@ export const getAQICategory = (aqi: number): AQICategory => {
   } else if (aqi <= 100) {
     return {
       level: "Moderate",
-      color: "#ffff00",
+      color: "#ca8a04",
       description: "Air quality is acceptable",
       healthMessage: "Sensitive people may experience minor breathing discomfort",
       recommendations: [
@@ -50,7 +50,7 @@ export const getAQICategory = (aqi: number): AQICategory => {
   } else if (aqi <= 150) {
     return {
       level: "Unhealthy for Sensitive Groups",
-      color: "#ff7e00",
+      color: "#ea580c",
       description: "Sensitive groups may experience health effects",
       healthMessage: "Children, elderly, and people with heart/lung disease should avoid outdoor activities",
       recommendations: [
@@ -63,7 +63,7 @@ export const getAQICategory = (aqi: number): AQICategory => {
   } else if (aqi <= 200) {
     return {
       level: "Unhealthy",
-      color: "#ff0000",
+      color: "#dc2626",
       description: "Everyone may experience health effects",
       healthMessage: "Everyone should avoid outdoor activities",
       recommendations: [
@@ -76,7 +76,7 @@ export const getAQICategory = (aqi: number): AQICategory => {
   } else if (aqi <= 300) {
     return {
       level: "Very Unhealthy",
-      color: "#8f3f97",
+      color: "#7c3aed",
       description: "Health warnings of emergency conditions",
       healthMessage: "Everyone should avoid all outdoor activities",
       recommendations: [
@@ -89,7 +89,7 @@ export const getAQICategory = (aqi: number): AQICategory => {
   } else {
     return {
       level: "Hazardous",
-      color: "#7e0023",
+      color: "#7f1d1d",
       description: "Health alert: everyone may experience serious health effects",
       healthMessage: "Emergency conditions - everyone should avoid all outdoor activities",
       recommendations: [
