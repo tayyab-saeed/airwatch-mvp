@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Card, Form, Input, Select, Switch, Button, Row, Col, Divider, Alert, Slider, InputNumber, ColorPicker, Tabs } from "antd";
+import { useState, useEffect } from "react";
+import { Card, Form, Input, Select, Switch, Button, Row, Col, Divider, Alert, Slider, InputNumber, ColorPicker, Tabs, App, Spin } from "antd";
 import { 
   Settings, 
   Bell, 
@@ -13,27 +13,70 @@ import {
   Save,
   RotateCcw,
   CheckCircle,
+  AlertCircle,
+  RefreshCw,
+  Activity,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import DashboardLayout from "../../components/DashboardLayout";
 import { InfoCircleOutlined } from "@ant-design/icons";
+import { testConnection } from "../../services/api";
 
 export default function SettingsPage() {
+  const { message } = App.useApp(); // Use hook-based API
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
+  const [apiStatus, setApiStatus] = useState<{
+    status: 'healthy' | 'unhealthy' | 'checking';
+    message?: string;
+    timestamp?: string;
+  }>({ status: 'checking' });
+
+  // Check API health on component mount
+  useEffect(() => {
+    checkApiHealth();
+  }, []);
+
+  const checkApiHealth = async () => {
+    setApiStatus({ status: 'checking' });
+    try {
+      const result = await testConnection();
+      if (result.success && result.data) {
+        setApiStatus({
+          status: result.data.status,
+          message: result.data.message,
+          timestamp: result.data.timestamp,
+        });
+      } else {
+        setApiStatus({
+          status: 'unhealthy',
+          message: result.error || 'Unable to connect to API',
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      setApiStatus({
+        status: 'unhealthy',
+        message: 'Error checking API health',
+        timestamp: new Date().toISOString(),
+      });
+    }
+  };
 
   const handleSave = async (values: any) => {
     setLoading(true);
     // Simulate API call
     setTimeout(() => {
       console.log("Settings saved:", values);
+      message.success("Settings saved successfully");
       setLoading(false);
     }, 1000);
   };
 
   const handleReset = () => {
     form.resetFields();
+    message.info("Settings reset to defaults");
   };
 
   const GeneralSettings = () => (
@@ -100,27 +143,61 @@ export default function SettingsPage() {
         </Form>
       </Card>
 
-      <Card title="Data Sources" className="mb-6">
+      <Card title="API Connection" className="mb-6">
         <div className="space-y-4">
-          <Form.Item label="Primary API Endpoint" name="primaryApi">
-            <Input placeholder="https://api.airwatch.example.com" />
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <div className="font-medium mb-2 flex items-center gap-2">
+                <Activity className="w-4 h-4" />
+                Backend API Status
+              </div>
+              
+              {apiStatus.status === 'checking' ? (
+                <div className="flex items-center gap-2">
+                  <Spin size="small" />
+                  <span className="text-sm text-gray-500">Checking API connection...</span>
+                </div>
+              ) : (
+                <Alert
+                  message={apiStatus.status === 'healthy' ? 'API Connected' : 'API Connection Failed'}
+                  description={apiStatus.message}
+                  type={apiStatus.status === 'healthy' ? 'success' : 'error'}
+                  icon={
+                    apiStatus.status === 'healthy' ? 
+                      <CheckCircle className="w-4 h-4" /> : 
+                      <AlertCircle className="w-4 h-4" />
+                  }
+                  showIcon
+                  action={
+                    <Button 
+                      size="small" 
+                      icon={<RefreshCw className="w-3 h-3" />}
+                      onClick={checkApiHealth}
+                    >
+                      Refresh
+                    </Button>
+                  }
+                />
+              )}
+            </div>
+          </div>
+
+          <Divider />
+
+          <Form.Item 
+            label="Primary API Endpoint" 
+            name="primaryApi" 
+            initialValue={process.env.NEXT_PUBLIC_API_URL || "https://nasa-hackathon-2025-backend.onrender.com"}
+          >
+            <Input disabled placeholder="https://api.airwatch.example.com" />
           </Form.Item>
           
-          <Form.Item label="Backup API Endpoint" name="backupApi">
-            <Input placeholder="https://backup.airwatch.example.com" />
-          </Form.Item>
-
-          <Form.Item label="API Key" name="apiKey">
-            <Input.Password placeholder="Enter your API key" />
-          </Form.Item>
-
-          <Alert
-            message="Data Source Status"
-            description="All data sources are currently active and responding normally."
-            type="success"
-            icon={<CheckCircle className="w-4 h-4" />}
-            showIcon
-          />
+          <div className="text-xs text-gray-500">
+            <p>API Endpoint: {process.env.NEXT_PUBLIC_API_URL || "https://nasa-hackathon-2025-backend.onrender.com"}</p>
+            {apiStatus.timestamp && (
+              <p>Last checked: {new Date(apiStatus.timestamp).toLocaleString()}</p>
+            )}
+          </div>
         </div>
       </Card>
     </div>
@@ -259,15 +336,15 @@ export default function SettingsPage() {
             <ColorPicker />
           </Form.Item>
 
-          <Form.Item label="Good AQI Color" name="goodColor" initialValue="#00e400">
+          <Form.Item label="Good AQI Color" name="goodColor" initialValue="#059669">
             <ColorPicker />
           </Form.Item>
 
-          <Form.Item label="Moderate AQI Color" name="moderateColor" initialValue="#ffff00">
+          <Form.Item label="Moderate AQI Color" name="moderateColor" initialValue="#ca8a04">
             <ColorPicker />
           </Form.Item>
 
-          <Form.Item label="Unhealthy AQI Color" name="unhealthyColor" initialValue="#ff0000">
+          <Form.Item label="Unhealthy AQI Color" name="unhealthyColor" initialValue="#dc2626">
             <ColorPicker />
           </Form.Item>
         </div>

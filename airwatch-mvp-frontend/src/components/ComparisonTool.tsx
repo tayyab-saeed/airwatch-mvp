@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, Select, Button, Row, Col, Table, Tag, Statistic, DatePicker } from "antd";
+import { Card, Select, Button, Row, Col, Table, Tag, Statistic, DatePicker, App } from "antd";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts";
 import { 
   BarChart3, 
@@ -14,7 +14,9 @@ import {
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import dayjs from "dayjs";
-import { getAQICategory, getAQIColor, generateMockData } from "../utils/airQuality";
+import { getAQICategory, getAQIColor } from "../utils/airQuality";
+import { predictAirQuality } from "../services/api";
+import { BackendLocation } from "../types/api";
 
 interface ComparisonData {
   location: string;
@@ -32,6 +34,7 @@ interface ComparisonToolProps {
 }
 
 export default function ComparisonTool({ selectedLocations = [] }: ComparisonToolProps) {
+  const { message } = App.useApp(); // Use hook-based API
   const [comparisonData, setComparisonData] = useState<ComparisonData[]>([]);
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>([
     dayjs().subtract(7, 'day'), 
@@ -40,38 +43,76 @@ export default function ComparisonTool({ selectedLocations = [] }: ComparisonToo
   const [loading, setLoading] = useState(false);
   const [selectedLocationsState, setSelectedLocationsState] = useState<string[]>(selectedLocations);
 
-  const locations = [
-    "Downtown", "Central Park", "Brooklyn", "Queens", "Bronx", 
-    "Manhattan", "Staten Island", "Long Island", "Westchester", "Newark"
-  ];
+  // Location coordinates mapping
+  const locationCoordinates: Record<string, BackendLocation> = {
+    "Downtown": { Latitude: 40.7128, Longitude: -74.0060 },
+    "Central Park": { Latitude: 40.7829, Longitude: -73.9654 },
+    "Brooklyn": { Latitude: 40.6782, Longitude: -73.9442 },
+    "Queens": { Latitude: 40.7282, Longitude: -73.7949 },
+    "Bronx": { Latitude: 40.8448, Longitude: -73.8648 },
+    "Manhattan": { Latitude: 40.7831, Longitude: -73.9712 },
+    "Staten Island": { Latitude: 40.5795, Longitude: -74.1502 },
+    "Long Island": { Latitude: 40.7891, Longitude: -73.1350 },
+    "Westchester": { Latitude: 41.0339, Longitude: -73.7629 },
+    "Newark": { Latitude: 40.7357, Longitude: -74.1724 }
+  };
 
-  // Generate comparison data
-  const generateComparisonData = (locations: string[]): ComparisonData[] => {
-    return locations.map(location => {
-      const mockData = generateMockData()[0];
-      const trend = Math.random() > 0.5 ? "up" : "down";
-      const trendPercentage = Math.random() * 20;
+  const locations = Object.keys(locationCoordinates);
+
+  // Fetch comparison data from API
+  const fetchComparisonData = async (locationNames: string[]) => {
+    setLoading(true);
+    try {
+      // Get coordinates for selected locations
+      const locationList: BackendLocation[] = locationNames
+        .map(name => locationCoordinates[name])
+        .filter(Boolean);
       
-      return {
-        location,
-        aqi: mockData.aqi + Math.floor(Math.random() * 50 - 25),
-        pm25: mockData.pm25 + Math.floor(Math.random() * 20 - 10),
-        pm10: mockData.pm10 + Math.floor(Math.random() * 30 - 15),
-        o3: mockData.o3 + Math.floor(Math.random() * 25 - 12),
-        trend,
-        trendPercentage,
-        lastUpdated: new Date().toISOString()
-      };
-    });
+      if (locationList.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch data from API
+      const result = await predictAirQuality(locationList, locationNames);
+      
+      if (result.success && result.data) {
+        // Transform to comparison data format
+        const compData: ComparisonData[] = result.data.map(item => {
+          // Calculate trend (random for now since we don't have historical data)
+          const trend = Math.random() > 0.5 ? "up" : "down" as "up" | "down";
+          const trendPercentage = Math.random() * 20;
+          
+          return {
+            location: item.location.name,
+            aqi: item.aqi,
+            pm25: item.pm25,
+            pm10: item.pm10,
+            o3: item.o3,
+            trend,
+            trendPercentage,
+            lastUpdated: item.timestamp
+          };
+        });
+        
+        setComparisonData(compData);
+      } else {
+        message.error(result.error || "Failed to fetch comparison data");
+        setComparisonData([]);
+      }
+    } catch (error) {
+      message.error("Error fetching comparison data");
+      setComparisonData([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     if (selectedLocationsState.length > 0) {
-      setLoading(true);
-      setTimeout(() => {
-        setComparisonData(generateComparisonData(selectedLocationsState));
-        setLoading(false);
-      }, 1000);
+      fetchComparisonData(selectedLocationsState);
+    } else {
+      setComparisonData([]);
     }
   }, [selectedLocationsState, dateRange]);
 

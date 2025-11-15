@@ -3,10 +3,24 @@
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Wind, Leaf, TrendingDown, Activity } from "lucide-react";
+import { useState, useEffect } from "react";
 import HeaderBar from "../components/HeaderBar";
 
 export default function HomePage() {
   const router = useRouter();
+  const [particles, setParticles] = useState<Array<{ x: number; y: number; duration: number }>>([]);
+  const [isClient, setIsClient] = useState(false);
+
+  // Generate particles only on client side to avoid hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+    const particleData = [...Array(20)].map(() => ({
+      x: Math.random() * 1920,
+      y: Math.random() * 1080,
+      duration: Math.random() * 10 + 20,
+    }));
+    setParticles(particleData);
+  }, []);
 
   return (
     <>
@@ -24,7 +38,7 @@ export default function HomePage() {
         
         {/* Animated particles/elements */}
         <div className="absolute inset-0 overflow-hidden">
-          {[...Array(20)].map((_, i) => (
+          {isClient && particles.map((particle, i) => (
             <motion.div
               key={i}
               style={{
@@ -35,15 +49,15 @@ export default function HomePage() {
                 borderRadius: '50%',
               }}
               initial={{
-                x: Math.random() * 1920,
-                y: Math.random() * 1080,
+                x: particle.x,
+                y: particle.y,
               }}
               animate={{
                 y: [null, Math.random() * 1080],
                 x: [null, Math.random() * 1920],
               }}
               transition={{
-                duration: Math.random() * 10 + 20,
+                duration: particle.duration,
                 repeat: Infinity,
                 ease: "linear",
               }}
