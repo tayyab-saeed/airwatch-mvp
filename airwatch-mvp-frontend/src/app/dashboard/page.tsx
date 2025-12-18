@@ -1,10 +1,8 @@
 "use client";
 
-import { Card, Col, Row, Alert, Progress, App } from "antd";
-import {  XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { Card, Alert, Progress, App } from "antd";
 import { TrendingUp, TrendingDown, Activity, Shield, Wind, Sun, Droplets, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
-import { format } from "date-fns";
 import DashboardLayout from "../../components/DashboardLayout";
 import { generateHistoricalData, getAQICategory, getAQIColor, getTimeAgo, AirQualityData } from "../../utils/airQuality";
 import { getCachedPrediction } from "../../services/api";
@@ -158,14 +156,6 @@ export default function DashboardPage() {
   const trend = currentAvg > previousAvg ? "up" : "down";
   const trendPercentage = Math.abs(((currentAvg - previousAvg) / previousAvg) * 100);
 
-  const formatChartData = historicalData.slice(-24).map((d, ) => ({
-    time: format(new Date(d.timestamp), "HH:mm"),
-    aqi: d.aqi,
-    pm25: d.pm25,
-    pm10: d.pm10,
-    o3: d.o3
-  }));
-
   const StatCard = ({ title, value, suffix, icon: Icon, color, trend, trendValue }: any) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -291,127 +281,73 @@ export default function DashboardPage() {
         )}
 
         {/* Key Metrics */}
-        <Row gutter={[20, 20]}>
-          <Col xs={24} sm={12} md={6}>
-            <StatCard
-              title="PM2.5 (µg/m³)"
-              value={currentData.pm25}
-              icon={Droplets}
-              color="#3b82f6"
-              trend={trend}
-              trendValue={trendPercentage.toFixed(1)}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={6}>
-            <StatCard
-              title="PM10 (µg/m³)"
-              value={currentData.pm10}
-              icon={Wind}
-              color="#8b5cf6"
-              trend={trend}
-              trendValue={trendPercentage.toFixed(1)}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={6}>
-            <StatCard
-              title="O3 (ppb)"
-              value={currentData.o3}
-              icon={Sun}
-              color="#f59e0b"
-              trend={trend}
-              trendValue={trendPercentage.toFixed(1)}
-            />
-          </Col>
-          <Col xs={24} sm={12} md={6}>
-            <StatCard
-              title="NO2 (ppb)"
-              value={currentData.no2}
-              icon={Activity}
-              color="#ef4444"
-              trend={trend}
-              trendValue={trendPercentage.toFixed(1)}
-            />
-          </Col>
-        </Row>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+          <StatCard
+            title="PM2.5 (µg/m³)"
+            value={currentData.pm25}
+            icon={Droplets}
+            color="#3b82f6"
+            trend={trend}
+            trendValue={trendPercentage.toFixed(1)}
+          />
+          <StatCard
+            title="PM10 (µg/m³)"
+            value={currentData.pm10}
+            icon={Wind}
+            color="#8b5cf6"
+            trend={trend}
+            trendValue={trendPercentage.toFixed(1)}
+          />
+          <StatCard
+            title="O3 (ppb)"
+            value={currentData.o3}
+            icon={Sun}
+            color="#f59e0b"
+            trend={trend}
+            trendValue={trendPercentage.toFixed(1)}
+          />
+          <StatCard
+            title="NO2 (ppb)"
+            value={currentData.no2}
+            icon={Activity}
+            color="#ef4444"
+            trend={trend}
+            trendValue={trendPercentage.toFixed(1)}
+          />
+        </div>
 
-        {/* Charts Section */}
-        <Row gutter={[20, 20]}>
-          <Col xs={24} lg={16}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Card title="24-Hour Air Quality Trends" className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={formatChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="time" 
-                      stroke="#666"
-                      fontSize={12}
-                      tick={{ fill: '#666' }}
-                    />
-                    <YAxis 
-                      stroke="#666"
-                      fontSize={12}
-                      tick={{ fill: '#666' }}
-                    />
-                    <RechartsTooltip 
-                      contentStyle={{
-                        backgroundColor: 'white',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="aqi"
-                      stroke={aqiColor}
-                      fill={aqiColor}
-                      fillOpacity={0.3}
-                      strokeWidth={2}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </Card>
-            </motion.div>
-          </Col>
-          <Col xs={24} lg={8}>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <Card title="Pollutant Breakdown" className="h-[400px]">
-                <div className="space-y-4 overflow-y-auto max-h-[320px] pr-4">
-                  {[
-                    { name: "PM2.5", value: currentData.pm25, max: 50, color: "#3b82f6" },
-                    { name: "PM10", value: currentData.pm10, max: 100, color: "#8b5cf6" },
-                    { name: "O3", value: currentData.o3, max: 100, color: "#f59e0b" },
-                    { name: "NO2", value: currentData.no2, max: 50, color: "#ef4444" },
-                    { name: "CO", value: currentData.co, max: 10, color: "#6b7280" },
-                    { name: "SO2", value: currentData.so2, max: 20, color: "#10b981" }
-                  ].map((pollutant) => (
-                    <div key={pollutant.name} className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">{pollutant.name}</span>
-                        <span className="text-sm text-gray-600">{pollutant.value}</span>
-                      </div>
-                      <Progress
-                        percent={(pollutant.value / pollutant.max) * 100}
-                        strokeColor={pollutant.color}
-                        showInfo={false}
-                        size="small"
-                      />
-                    </div>
-                  ))}
+        {/* Pollutant Breakdown */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card title="Pollutant Breakdown">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { name: "PM2.5", value: currentData.pm25, max: 50, color: "#3b82f6" },
+                { name: "PM10", value: currentData.pm10, max: 100, color: "#8b5cf6" },
+                { name: "O3", value: currentData.o3, max: 100, color: "#f59e0b" },
+                { name: "NO2", value: currentData.no2, max: 50, color: "#ef4444" },
+                { name: "CO", value: currentData.co, max: 10, color: "#6b7280" },
+                { name: "SO2", value: currentData.so2, max: 20, color: "#10b981" }
+              ].map((pollutant) => (
+                <div key={pollutant.name} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">{pollutant.name}</span>
+                    <span className="text-sm text-gray-600">{pollutant.value}</span>
+                  </div>
+                  <Progress
+                    percent={(pollutant.value / pollutant.max) * 100}
+                    strokeColor={pollutant.color}
+                    showInfo={false}
+                    size="small"
+                  />
                 </div>
-              </Card>
-            </motion.div>
-          </Col>
-        </Row>
+              ))}
+            </div>
+          </Card>
+        </motion.div>
 
         {/* Additional Information */}
         <motion.div
